@@ -10,7 +10,7 @@ interface Props {
   accent: string
 }
 
-export default function Sidebar({ role, platformStatus, isDemo, onConfigOpen, accent }: Props) {
+export default function Sidebar({ role, platformStatus, platformConfigs, isDemo, onConfigOpen, accent }: Props) {
   const config = ROLE_CONFIGS[role]
 
   return (
@@ -46,6 +46,8 @@ export default function Sidebar({ role, platformStatus, isDemo, onConfigOpen, ac
           const status = platformStatus[platform.id]
           const connected = !isDemo && status?.connected
           const offline = !connected
+          const displayUrl = (platformConfigs[platform.id]?.url?.trim() || platform.url)
+            .replace(/^https?:\/\//, '')
 
           return (
             <div
@@ -112,19 +114,17 @@ export default function Sidebar({ role, platformStatus, isDemo, onConfigOpen, ac
                 </button>
               </div>
 
-              {isDemo && (
-                <div style={{
-                  marginTop: 3,
-                  fontSize: 9,
-                  color: COLORS.textMuted,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {platform.url.replace('https://', '')}
-                </div>
-              )}
+              <div style={{
+                marginTop: 3,
+                fontSize: 9,
+                color: COLORS.textMuted,
+                fontFamily: "'IBM Plex Mono', monospace",
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {displayUrl}
+              </div>
             </div>
           )
         })}

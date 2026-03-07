@@ -1,4 +1,4 @@
-import type { Role, ToolCall } from './types'
+import type { Role, ToolCall, PlatformConfig } from './types'
 import { ROLE_CONFIGS } from './constants'
 import { getDemoResponse, getDemoToolCalls } from './demoData'
 
@@ -28,8 +28,17 @@ export async function queryAEC(
   conversationHistory: ApiMessage[],
   apiKey: string,
   projectId: string,
+  platformConfigs?: Record<string, PlatformConfig>,
 ): Promise<QueryResult> {
   const roleConfig = ROLE_CONFIGS[role]
+
+  // Build mcpServers — use platformConfig URL override when available and enabled
+  const mcpServers = roleConfig.mcpServers
+    .filter(s => platformConfigs?.[s.name]?.enabled !== false)
+    .map(s => {
+      const cfgUrl = platformConfigs?.[s.name]?.url?.trim()
+      return { type: 'url' as const, name: s.name, url: cfgUrl || s.url }
+    })
 
   const systemPrompt = roleConfig.systemPrompt + `\n\nActive Project: Project ${projectId}. Always scope queries to this project unless the user explicitly asks about all projects or portfolio.`
 
@@ -52,7 +61,7 @@ export async function queryAEC(
       thinking: { type: 'adaptive' },
       system: systemPrompt,
       messages,
-      mcp_servers: roleConfig.mcpServers,
+      mcp_servers: mcpServers,
     }),
   })
 

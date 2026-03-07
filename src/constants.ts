@@ -7,9 +7,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: '🔨',
     accent: '#f59e0b',
     platforms: [
-      { id: 'procore', name: 'Procore', icon: '🏗', color: '#f59e0b', url: 'https://procore.mcp.example.com/sse' },
-      { id: 'autodesk-acc', name: 'Autodesk ACC', icon: '📐', color: '#3b82f6', url: 'https://acc.mcp.example.com/sse' },
-      { id: 'primavera-p6', name: 'Primavera P6', icon: '📅', color: '#8b5cf6', url: 'https://p6.mcp.example.com/sse' },
+      { id: 'procore', name: 'Procore', icon: '🏗', color: '#f59e0b', url: 'http://localhost:3001/sse' },
+      { id: 'autodesk-acc', name: 'Autodesk ACC', icon: '📐', color: '#3b82f6', url: 'http://localhost:3002/sse' },
+      { id: 'primavera-p6', name: 'Primavera P6', icon: '📅', color: '#8b5cf6', url: 'http://localhost:3003/sse' },
     ],
     systemPrompt: `You are an expert General Contractor project management AI integrated via MCP with Procore (field ops, RFIs, submittals, budget), Autodesk ACC (BIM coordination, issues), and Primavera P6 (CPM scheduling). Route queries intelligently: field operations → procore, model/design issues → acc, schedule/critical path → primavera-p6. Always return structured JSON arrays for list queries. Format currency as $X,XXX,XXX. Format dates as MM/DD/YYYY. Flag items that are overdue or over budget with [ALERT] prefix.`,
     promptSuggestions: [
@@ -23,9 +23,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
       'Show punch list items by trade and responsible party',
     ],
     mcpServers: [
-      { type: 'url', url: 'https://procore.mcp.example.com/sse', name: 'procore' },
-      { type: 'url', url: 'https://acc.mcp.example.com/sse', name: 'autodesk-acc' },
-      { type: 'url', url: 'https://p6.mcp.example.com/sse', name: 'primavera-p6' },
+      { type: 'url', url: 'http://localhost:3001/sse', name: 'procore' },
+      { type: 'url', url: 'http://localhost:3002/sse', name: 'autodesk-acc' },
+      { type: 'url', url: 'http://localhost:3003/sse', name: 'primavera-p6' },
     ],
   },
   architect_engineer: {
@@ -34,9 +34,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: '📐',
     accent: '#3b82f6',
     platforms: [
-      { id: 'autodesk-acc', name: 'Autodesk ACC', icon: '☁️', color: '#3b82f6', url: 'https://acc.mcp.example.com/sse' },
-      { id: 'autodesk-aps', name: 'Autodesk APS', icon: '🧊', color: '#60a5fa', url: 'https://aps.autodesk.com/mcp/sse' },
-      { id: 'bluebeam', name: 'Bluebeam', icon: '✏️', color: '#0ea5e9', url: 'https://bluebeam.mcp.example.com/sse' },
+      { id: 'autodesk-acc', name: 'Autodesk ACC', icon: '☁️', color: '#3b82f6', url: 'http://localhost:3002/sse' },
+      { id: 'autodesk-aps', name: 'Autodesk APS', icon: '🧊', color: '#60a5fa', url: 'http://localhost:3004/sse' },
+      { id: 'bluebeam', name: 'Bluebeam', icon: '✏️', color: '#0ea5e9', url: 'http://localhost:3005/sse' },
     ],
     systemPrompt: `You are an expert A/E project delivery AI integrated via MCP with Autodesk ACC (drawings, issues, transmittals), Autodesk APS/Revit (BIM model data), and Bluebeam (PDF review/markup sessions). Route: document control → acc, BIM/model queries → autodesk-aps, PDF review/approvals → bluebeam. Return drawing lists with current revision and issue date. Flag unanswered RFIs over 10 days with [OVERDUE].`,
     promptSuggestions: [
@@ -50,9 +50,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
       'Show clash detection report from last coordination meeting',
     ],
     mcpServers: [
-      { type: 'url', url: 'https://acc.mcp.example.com/sse', name: 'autodesk-acc' },
-      { type: 'url', url: 'https://aps.autodesk.com/mcp/sse', name: 'autodesk-aps' },
-      { type: 'url', url: 'https://bluebeam.mcp.example.com/sse', name: 'bluebeam' },
+      { type: 'url', url: 'http://localhost:3002/sse', name: 'autodesk-acc' },
+      { type: 'url', url: 'http://localhost:3004/sse', name: 'autodesk-aps' },
+      { type: 'url', url: 'http://localhost:3005/sse', name: 'bluebeam' },
     ],
   },
   owner_developer: {
@@ -61,8 +61,8 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: '🏢',
     accent: '#8b5cf6',
     platforms: [
-      { id: 'oracle-aconex', name: 'Oracle Aconex', icon: '📁', color: '#8b5cf6', url: 'https://aconex.mcp.example.com/sse' },
-      { id: 'cmic-erp', name: 'CMiC ERP', icon: '💼', color: '#a78bfa', url: 'https://cmic.mcp.example.com/sse' },
+      { id: 'oracle-aconex', name: 'Oracle Aconex', icon: '📁', color: '#8b5cf6', url: 'http://localhost:3006/sse' },
+      { id: 'cmic-erp', name: 'CMiC ERP', icon: '💼', color: '#a78bfa', url: 'http://localhost:3007/sse' },
     ],
     systemPrompt: `You are an expert Owner/Developer executive AI integrated via MCP with Oracle Aconex (document control, workflows, correspondence) and CMiC ERP (job cost, contracts, AP/AR, forecasting). Route: document workflows/approvals → oracle-aconex, financial/cost/contract data → cmic-erp. Always show budget variance as both $ and %. Executive summaries should be 3 bullets max unless detail requested. Flag any items with >5% budget overrun with [OVER BUDGET].`,
     promptSuggestions: [
@@ -76,8 +76,8 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
       'Generate executive summary of project health across portfolio',
     ],
     mcpServers: [
-      { type: 'url', url: 'https://aconex.mcp.example.com/sse', name: 'oracle-aconex' },
-      { type: 'url', url: 'https://cmic.mcp.example.com/sse', name: 'cmic-erp' },
+      { type: 'url', url: 'http://localhost:3006/sse', name: 'oracle-aconex' },
+      { type: 'url', url: 'http://localhost:3007/sse', name: 'cmic-erp' },
     ],
   },
   preconstruction: {
@@ -86,9 +86,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
     icon: '📊',
     accent: '#10b981',
     platforms: [
-      { id: 'stack-ct', name: 'STACK CT', icon: '📏', color: '#10b981', url: 'https://stack.mcp.example.com/sse' },
-      { id: 'building-connected', name: 'BuildingConnected', icon: '🔗', color: '#34d399', url: 'https://buildingconnected.mcp.example.com/sse' },
-      { id: 'sage-estimating', name: 'Sage Estimating', icon: '🧮', color: '#6ee7b7', url: 'https://sage-est.mcp.example.com/sse' },
+      { id: 'stack-ct', name: 'STACK CT', icon: '📏', color: '#10b981', url: 'http://localhost:3008/sse' },
+      { id: 'building-connected', name: 'BuildingConnected', icon: '🔗', color: '#34d399', url: 'http://localhost:3009/sse' },
+      { id: 'sage-estimating', name: 'Sage Estimating', icon: '🧮', color: '#6ee7b7', url: 'http://localhost:3010/sse' },
     ],
     systemPrompt: `You are an expert Preconstruction and Estimating AI integrated via MCP with STACK (digital takeoff/quantities), BuildingConnected (bid management/subs), and Sage Estimating (detailed estimates/cost history). Route: takeoff quantities → stack-ct, bid mgmt/sub coverage → building-connected, detailed estimating/historical costs → sage-estimating. Show quantities with units. Show bid coverage as X of Y trades covered. Flag missing sub coverage with [NO COVERAGE].`,
     promptSuggestions: [
@@ -102,9 +102,9 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
       'Summarize bid leveling for Division 09 finishes',
     ],
     mcpServers: [
-      { type: 'url', url: 'https://stack.mcp.example.com/sse', name: 'stack-ct' },
-      { type: 'url', url: 'https://buildingconnected.mcp.example.com/sse', name: 'building-connected' },
-      { type: 'url', url: 'https://sage-est.mcp.example.com/sse', name: 'sage-estimating' },
+      { type: 'url', url: 'http://localhost:3008/sse', name: 'stack-ct' },
+      { type: 'url', url: 'http://localhost:3009/sse', name: 'building-connected' },
+      { type: 'url', url: 'http://localhost:3010/sse', name: 'sage-estimating' },
     ],
   },
 }

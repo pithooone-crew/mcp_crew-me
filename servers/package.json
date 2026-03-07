@@ -1,0 +1,36 @@
+{
+  "name": "aec-mcp-servers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:procore":           "tsx watch src/procore.ts",
+    "dev:autodesk-acc":      "tsx watch src/autodesk-acc.ts",
+    "dev:primavera-p6":      "tsx watch src/primavera-p6.ts",
+    "dev:autodesk-aps":      "tsx watch src/autodesk-aps.ts",
+    "dev:bluebeam":          "tsx watch src/bluebeam.ts",
+    "dev:oracle-aconex":     "tsx watch src/oracle-aconex.ts",
+    "dev:cmic-erp":          "tsx watch src/cmic-erp.ts",
+    "dev:stack-ct":          "tsx watch src/stack-ct.ts",
+    "dev:building-connected":"tsx watch src/building-connected.ts",
+    "dev:sage-estimating":   "tsx watch src/sage-estimating.ts",
+    "dev": "concurrently -n procore,acc,p6,aps,bluebeam,aconex,cmic,stack,bc,sage -c yellow,blue,cyan,blueBright,green,magenta,red,greenBright,cyan,white \"npm:dev:*\"",
+    "build": "tsc",
+    "start": "concurrently \"node dist/procore.js\" \"node dist/autodesk-acc.js\" \"node dist/primavera-p6.js\" \"node dist/autodesk-aps.js\" \"node dist/bluebeam.js\" \"node dist/oracle-aconex.js\" \"node dist/cmic-erp.js\" \"node dist/stack-ct.js\" \"node dist/building-connected.js\" \"node dist/sage-estimating.js\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.0",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

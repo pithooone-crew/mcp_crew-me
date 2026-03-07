@@ -99,7 +99,7 @@ export default function App() {
         result = await queryDemo(message, role, history, project.id)
       } else {
         if (!apiKey) throw new Error('API key required. Open ⚙ Config to add your key.')
-        result = await queryAEC(message, role, history, apiKey, project.id)
+        result = await queryAEC(message, role, history, apiKey, project.id, platformConfigs)
       }
 
       setToolCalls(result.toolCalls)

@@ -38,10 +38,15 @@ function PlatformSection({
   const [showToken, setShowToken] = useState(false)
 
   const handleTest = async () => {
+    if (!config.url) { setTestStatus('fail'); return }
     setTestStatus('testing')
-    await new Promise(r => setTimeout(r, 1200))
-    // In a real app, this would test the MCP server connection
-    setTestStatus(config.token ? 'ok' : 'fail')
+    try {
+      const healthUrl = config.url.replace(/\/sse$/, '') + '/health'
+      const res = await fetch(healthUrl, { signal: AbortSignal.timeout(4000) })
+      setTestStatus(res.ok ? 'ok' : 'fail')
+    } catch {
+      setTestStatus('fail')
+    }
   }
 
   const inputStyle = {
