@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Role, Project } from '../types'
-import { ROLE_CONFIGS, ROLE_ACCENT, COLORS } from '../constants'
+import { ROLE_CONFIGS, ROLE_ACCENT, COLORS, PROJECTS } from '../constants'
 
 interface Props {
   role: Role
@@ -8,20 +8,17 @@ interface Props {
   project: Project
   onProjectChange: (p: Project) => void
   onConfigOpen: () => void
+  onNotificationsOpen?: () => void
+  onAnalyticsOpen?: () => void
+  onPlaybooksOpen?: () => void
+  notificationCount?: number
   accent: string
   isDemo: boolean
 }
 
-const PROJECTS = [
-  { name: 'Riverside Tower', id: '2240' },
-  { name: 'Harbor District Office', id: '2238' },
-  { name: 'Lakefront Retail Center', id: '2235' },
-  { name: 'Midtown Mixed-Use', id: '2242' },
-]
-
 const ROLES = Object.values(ROLE_CONFIGS)
 
-export default function TopBar({ role, onRoleChange, project, onProjectChange, onConfigOpen, accent }: Props) {
+export default function TopBar({ role, onRoleChange, project, onProjectChange, onConfigOpen, onNotificationsOpen, onAnalyticsOpen, onPlaybooksOpen, notificationCount = 0, accent }: Props) {
   const [projectOpen, setProjectOpen] = useState(false)
 
   return (
@@ -144,11 +141,12 @@ export default function TopBar({ role, onRoleChange, project, onProjectChange, o
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
+                  borderTop: p.isPortfolio ? `1px solid ${COLORS.border}` : undefined,
                 }}
                 onMouseEnter={e => { if (p.id !== project.id) e.currentTarget.style.background = '#1e2d40' }}
                 onMouseLeave={e => { if (p.id !== project.id) e.currentTarget.style.background = 'transparent' }}
               >
-                <span>{p.name}</span>
+                <span>{p.isPortfolio ? '🗂 ' : ''}{p.name}</span>
                 <span style={{ color: COLORS.textMuted }}>#{p.id}</span>
               </div>
             ))}
@@ -169,6 +167,95 @@ export default function TopBar({ role, onRoleChange, project, onProjectChange, o
         <kbd style={{ background: '#1e2d40', borderRadius: 3, padding: '2px 5px', fontSize: 10 }}>⌘K</kbd>
         <span>palette</span>
       </div>
+
+      {/* Playbooks button */}
+      {onPlaybooksOpen && (
+        <button
+          onClick={onPlaybooksOpen}
+          style={{
+            background: 'transparent',
+            border: `1px solid ${COLORS.border}`,
+            borderRadius: 6,
+            color: COLORS.textMuted,
+            cursor: 'pointer',
+            padding: '6px 10px',
+            marginRight: 6,
+            fontSize: 13,
+            fontFamily: "'IBM Plex Mono', monospace",
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = accent; e.currentTarget.style.borderColor = accent }}
+          onMouseLeave={e => { e.currentTarget.style.color = COLORS.textMuted; e.currentTarget.style.borderColor = COLORS.border }}
+          title="Saved Queries & Playbooks"
+        >
+          📋
+        </button>
+      )}
+
+      {/* Analytics button */}
+      {onAnalyticsOpen && (
+        <button
+          onClick={onAnalyticsOpen}
+          style={{
+            background: 'transparent',
+            border: `1px solid ${COLORS.border}`,
+            borderRadius: 6,
+            color: COLORS.textMuted,
+            cursor: 'pointer',
+            padding: '6px 10px',
+            marginRight: 6,
+            fontSize: 13,
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = accent; e.currentTarget.style.borderColor = accent }}
+          onMouseLeave={e => { e.currentTarget.style.color = COLORS.textMuted; e.currentTarget.style.borderColor = COLORS.border }}
+          title="Usage Analytics"
+        >
+          📊
+        </button>
+      )}
+
+      {/* Notification Bell */}
+      {onNotificationsOpen && (
+        <button
+          onClick={onNotificationsOpen}
+          style={{
+            background: 'transparent',
+            border: `1px solid ${notificationCount > 0 ? accent : COLORS.border}`,
+            borderRadius: 6,
+            color: notificationCount > 0 ? accent : COLORS.textMuted,
+            cursor: 'pointer',
+            padding: '6px 10px',
+            marginRight: 6,
+            fontSize: 13,
+            position: 'relative',
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          title={`Notifications${notificationCount > 0 ? ` (${notificationCount} unread)` : ''}`}
+        >
+          🔔
+          {notificationCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: -5,
+              right: -5,
+              background: '#ef4444',
+              color: '#fff',
+              borderRadius: '50%',
+              width: 16,
+              height: 16,
+              fontSize: 9,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700,
+              fontFamily: "'IBM Plex Mono', monospace",
+            }}>
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
+        </button>
+      )}
 
       {/* Config button */}
       <button

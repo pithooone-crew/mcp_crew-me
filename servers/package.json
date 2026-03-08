@@ -14,7 +14,9 @@
     "dev:stack-ct":          "tsx watch src/stack-ct.ts",
     "dev:building-connected":"tsx watch src/building-connected.ts",
     "dev:sage-estimating":   "tsx watch src/sage-estimating.ts",
-    "dev": "concurrently -n procore,acc,p6,aps,bluebeam,aconex,cmic,stack,bc,sage -c yellow,blue,cyan,blueBright,green,magenta,red,greenBright,cyan,white \"npm:dev:*\"",
+    "dev:safety":            "tsx watch src/safety.ts",
+    "dev:proxy":             "tsx watch src/proxy.ts",
+    "dev": "concurrently -n proxy,procore,acc,p6,aps,bluebeam,aconex,cmic,stack,bc,sage,safety -c gray,yellow,blue,cyan,blueBright,green,magenta,red,greenBright,cyan,white,redBright \"npm:dev:*\"",
     "build": "tsc",
     "start": "concurrently \"node dist/procore.js\" \"node dist/autodesk-acc.js\" \"node dist/primavera-p6.js\" \"node dist/autodesk-aps.js\" \"node dist/bluebeam.js\" \"node dist/oracle-aconex.js\" \"node dist/cmic-erp.js\" \"node dist/stack-ct.js\" \"node dist/building-connected.js\" \"node dist/sage-estimating.js\""
   },

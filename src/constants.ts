@@ -107,6 +107,29 @@ export const ROLE_CONFIGS: Record<Role, RoleConfig> = {
       { type: 'url', url: 'http://localhost:3010/sse', name: 'sage-estimating' },
     ],
   },
+  safety: {
+    id: 'safety',
+    label: 'Safety Manager',
+    icon: '🦺',
+    accent: '#ef4444',
+    platforms: [
+      { id: 'safety-platform', name: 'Safety Platform', icon: '🛡️', color: '#ef4444', url: 'http://localhost:3011/sse' },
+    ],
+    systemPrompt: `You are an expert Construction Safety Manager AI integrated via MCP with a safety management platform (incidents, OSHA compliance, toolbox talks, observations, KPIs). Route: incident reports → list_incidents, compliance status → get_osha_compliance_status, safety training/toolbox talks → list_toolbox_talks, KPIs/metrics → get_safety_metrics, field observations → list_safety_observations. Flag all open OSHA-recordable incidents with [ALERT]. Flag any compliance category below 80% with [ALERT]. Express TRIR and DART rates in industry-standard format (per 200,000 manhours). Always compare against industry average.`,
+    promptSuggestions: [
+      'Show all open OSHA-recordable incidents this month',
+      'Get OSHA compliance status across all categories',
+      'List toolbox talks due this week and attendance records',
+      'Show project TRIR and DART rates vs industry average',
+      'Pull all at-risk safety observations from last 14 days',
+      'Summarize corrective actions outstanding on open incidents',
+      'What safety training is overdue for project personnel?',
+      'Show near-miss frequency trend for the past 3 months',
+    ],
+    mcpServers: [
+      { type: 'url', url: 'http://localhost:3011/sse', name: 'safety-platform' },
+    ],
+  },
 }
 
 export const COLORS = {
@@ -117,6 +140,7 @@ export const COLORS = {
   accentAE: '#3b82f6',
   accentOW: '#8b5cf6',
   accentPre: '#10b981',
+  accentSafety: '#ef4444',
   textPrimary: '#f1f5f9',
   textMuted: '#64748b',
   border: '#1e2d40',
@@ -128,4 +152,13 @@ export const ROLE_ACCENT: Record<Role, string> = {
   architect_engineer: '#3b82f6',
   owner_developer: '#8b5cf6',
   preconstruction: '#10b981',
+  safety: '#ef4444',
 }
+
+export const PROJECTS = [
+  { name: 'Riverside Tower', id: '2240' },
+  { name: 'Harbor District Office', id: '2238' },
+  { name: 'Lakefront Retail Center', id: '2235' },
+  { name: 'Midtown Mixed-Use', id: '2242' },
+  { name: 'All Projects (Portfolio)', id: 'portfolio', isPortfolio: true },
+]

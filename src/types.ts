@@ -1,4 +1,4 @@
-export type Role = 'general_contractor' | 'architect_engineer' | 'owner_developer' | 'preconstruction'
+export type Role = 'general_contractor' | 'architect_engineer' | 'owner_developer' | 'preconstruction' | 'safety'
 
 export interface Platform {
   id: string
@@ -35,6 +35,10 @@ export interface Message {
   rawBlocks?: ContentBlock[]
 }
 
+export interface SerializedMessage extends Omit<Message, 'timestamp'> {
+  timestamp: string // ISO string for JSON serialization
+}
+
 export interface ToolCall {
   id: string
   platform: string
@@ -58,6 +62,8 @@ export interface PlatformStatus {
   id: string
   connected: boolean
   lastSync?: string
+  latencyMs?: number
+  lastChecked?: string
 }
 
 export interface PlatformConfig {
@@ -70,6 +76,7 @@ export interface PlatformConfig {
 export interface Project {
   name: string
   id: string
+  isPortfolio?: boolean
 }
 
 export interface TableRow {
@@ -81,4 +88,85 @@ export interface BudgetItem {
   budget: number
   actual: number
   variance: number
+}
+
+// Saved queries & playbooks
+export interface SavedQuery {
+  id: string
+  text: string
+  role: Role
+  projectId: string
+  createdAt: string
+}
+
+export interface Playbook {
+  id: string
+  name: string
+  description: string
+  queries: string[]
+  role: Role
+  createdAt: string
+}
+
+export interface PlaybookStore {
+  playbooks: Playbook[]
+  savedQueries: SavedQuery[]
+}
+
+// Notifications
+export interface Notification {
+  id: string
+  messageId: string
+  flag: string
+  excerpt: string
+  role: Role
+  projectId: string
+  timestamp: string
+  read: boolean
+}
+
+// File uploads
+export interface UploadedFile {
+  name: string
+  type: string
+  base64: string
+  mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp' | 'application/pdf'
+}
+
+// Analytics
+export interface AnalyticsEvent {
+  timestamp: string
+  role: Role
+  projectId: string
+  queryLength: number
+  platformsInvoked: string[]
+  toolCount: number
+  isDemo: boolean
+}
+
+export interface AnalyticsStore {
+  events: AnalyticsEvent[]
+  lastReset: string
+}
+
+// User profile
+export interface UserProfile {
+  name: string
+  initials: string
+  email?: string
+  color: string
+}
+
+// Write-back actions
+export interface WriteAction {
+  id: string
+  label: string
+  tool: string
+  platform: string
+  prefillParams?: Record<string, unknown>
+}
+
+// Conversation persistence
+export interface ConversationStore {
+  [key: string]: SerializedMessage[]
 }

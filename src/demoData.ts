@@ -178,6 +178,81 @@ const PRE_ESTIMATE_RESPONSE = `Sage Estimating — Base Bid Summary (Northside C
 
 Historical comparison vs 3 similar projects (avg $4.87M base, ±8% variance): Current estimate is **4.1% above** historical average — driven by current steel escalation (+9% YoY).`
 
+const SAFETY_INCIDENTS_RESPONSE = `Safety Incident Report — Riverside Tower (Last 30 Days):
+
+\`\`\`json
+[
+  {"id": "INC-2240-047", "date": "03/05/2026", "type": "Near Miss", "description": "Unsecured load fell from Level 12 scaffolding — no injuries", "trade": "Ironworkers", "recordable": false, "status": "Open", "corrective_action": "Pending"},
+  {"id": "INC-2240-046", "date": "02/28/2026", "type": "First Aid", "description": "Laceration — hand injury during rebar placement", "trade": "Concrete", "recordable": false, "status": "Closed", "corrective_action": "Completed"},
+  {"id": "INC-2240-045", "date": "02/21/2026", "type": "OSHA Recordable", "description": "Electrical shock — lockout/tagout violation by Skyline Electrical", "trade": "Electrical", "recordable": true, "status": "Open", "corrective_action": "Pending"},
+  {"id": "INC-2240-043", "date": "02/14/2026", "type": "OSHA Recordable", "description": "Struck-by: Falling debris hit subcontractor — hard hat prevented serious injury", "trade": "Masonry", "recordable": true, "status": "Closed", "corrective_action": "Completed"},
+  {"id": "INC-2240-041", "date": "02/09/2026", "type": "Near Miss", "description": "Scaffold plank failure — worker caught by lifeline", "trade": "Laborers", "recordable": false, "status": "Closed", "corrective_action": "Completed"}
+]
+\`\`\`
+
+**[ALERT] 2 open OSHA-recordable incidents** — corrective actions pending for INC-2240-047 and INC-2240-045.
+
+TRIR (last 90 days): **2.80** vs. industry average 3.40 — project is performing better than industry but trending upward.
+
+Recommend immediate stand-down for Skyline Electrical crew pending LOTO retraining completion.`
+
+const SAFETY_METRICS_RESPONSE = `Safety Performance Metrics — Riverside Tower (YTD 2026):
+
+\`\`\`json
+[
+  {"metric": "TRIR", "value": 2.80, "industry_avg": 3.40, "trend": "up", "status": "Warning"},
+  {"metric": "DART Rate", "value": 1.20, "industry_avg": 1.80, "trend": "stable", "status": "Good"},
+  {"metric": "Near Miss Reports", "value": 14, "industry_avg": null, "trend": "up", "status": "Info"},
+  {"metric": "Safety Observations", "value": 89, "industry_avg": null, "trend": "up", "status": "Good"},
+  {"metric": "Toolbox Talks Completed", "value": 18, "industry_avg": null, "trend": "stable", "status": "Good"},
+  {"metric": "Days Without Recordable", "value": 8, "industry_avg": null, "trend": "reset", "status": "Warning"}
+]
+\`\`\`
+
+**Overall Assessment:** Project is performing **below industry average** for TRIR and DART Rate, which is positive. However, the LOTO violation on 02/21 reset the recordable-free streak to 8 days.
+
+**Top Risk Factors This Week:**
+- Ironworker overhead work at Level 13-14 (unsecured load incident)
+- Electrical crew LOTO non-compliance (pending retraining)
+- Scaffold inspection overdue for Tower Crane #2 base area`
+
+const SAFETY_TOOLBOX_RESPONSE = `Toolbox Talk Compliance — March 2026:
+
+\`\`\`json
+[
+  {"talk": "TBT-032", "topic": "Lockout/Tagout Procedures", "required_by": "03/07/2026", "status": "Overdue", "trades_completed": ["Concrete", "Ironworkers"], "trades_pending": ["Electrical", "Plumbing", "Mechanical"]},
+  {"talk": "TBT-031", "topic": "Fall Protection — Leading Edge Work", "required_by": "03/05/2026", "status": "Complete", "trades_completed": ["All Trades"], "trades_pending": []},
+  {"talk": "TBT-030", "topic": "Struck-By Hazards — Overhead Work Zones", "required_by": "03/01/2026", "status": "Complete", "trades_completed": ["All Trades"], "trades_pending": []},
+  {"talk": "TBT-033", "topic": "Heat Illness Prevention", "required_by": "03/14/2026", "status": "Scheduled", "trades_completed": [], "trades_pending": ["All Trades"]},
+  {"talk": "TBT-034", "topic": "Confined Space Entry", "required_by": "03/21/2026", "status": "Scheduled", "trades_completed": [], "trades_pending": ["Plumbing", "Mechanical"]}
+]
+\`\`\`
+
+**[OVERDUE] TBT-032 (Lockout/Tagout)** is overdue — 3 trades have not completed. This is directly related to the 02/21 LOTO incident involving Skyline Electrical.
+
+Action Required: Schedule mandatory LOTO training for Electrical, Plumbing, and Mechanical crews before end of week.`
+
+const SAFETY_COMPLIANCE_RESPONSE = `OSHA Compliance Status — Riverside Tower (03/07/2026):
+
+\`\`\`json
+[
+  {"category": "Fall Protection", "score": 94, "items_inspected": 48, "violations": 3, "status": "Compliant", "last_inspection": "03/05/2026"},
+  {"category": "Electrical Safety (LOTO)", "score": 72, "items_inspected": 18, "violations": 5, "status": "Non-Compliant", "last_inspection": "03/03/2026"},
+  {"category": "Scaffolding & Access", "score": 88, "items_inspected": 24, "violations": 3, "status": "Compliant", "last_inspection": "03/04/2026"},
+  {"category": "PPE Compliance", "score": 91, "items_inspected": 147, "violations": 13, "status": "Compliant", "last_inspection": "03/07/2026"},
+  {"category": "Housekeeping & Sanitation", "score": 96, "items_inspected": 62, "violations": 2, "status": "Compliant", "last_inspection": "03/06/2026"}
+]
+\`\`\`
+
+**[ALERT] Electrical Safety (LOTO) is NON-COMPLIANT** with a score of 72/100 — 5 violations identified.
+
+Immediate corrective actions required:
+- Conduct site-wide LOTO audit for all electrical crews
+- Mandatory retraining for Skyline Electrical before they resume panel work
+- Verify lockout devices are properly applied on all live panels at Level 12-14
+
+All other categories are within acceptable compliance thresholds.`
+
 export function getDemoToolCalls(role: Role, query: string): ToolCall[] {
   const q = query.toLowerCase()
   const id1 = makeId()
@@ -272,6 +347,39 @@ export function getDemoToolCalls(role: Role, query: string): ToolCall[] {
     ]
   }
 
+  if (role === 'safety') {
+    if (q.includes('incident') || q.includes('osha') || q.includes('recordable') || q.includes('injury')) {
+      return [
+        { id: id1, platform: 'safety-platform', tool: 'list_incidents', params: { project_id: '2240', days: 30 }, result: '5 incidents', resultCount: 5, durationMs: 289, status: 'success' },
+        { id: id2, platform: 'safety-platform', tool: 'get_safety_metrics', params: { project_id: '2240', period: '90d' }, result: 'TRIR: 2.80', durationMs: 198, status: 'success' },
+      ]
+    }
+    if (q.includes('metric') || q.includes('trir') || q.includes('dart') || q.includes('performance') || q.includes('kpi')) {
+      return [
+        { id: id1, platform: 'safety-platform', tool: 'get_safety_metrics', params: { project_id: '2240', period: '90d' }, result: 'TRIR: 2.80, DART: 1.20', durationMs: 245, status: 'success' },
+      ]
+    }
+    if (q.includes('toolbox') || q.includes('tbt') || q.includes('training') || q.includes('talk')) {
+      return [
+        { id: id1, platform: 'safety-platform', tool: 'list_toolbox_talks', params: { project_id: '2240', month: '2026-03' }, result: '5 toolbox talks', resultCount: 5, durationMs: 178, status: 'success' },
+      ]
+    }
+    if (q.includes('compliance') || q.includes('loto') || q.includes('ppe') || q.includes('inspection') || q.includes('violation')) {
+      return [
+        { id: id1, platform: 'safety-platform', tool: 'get_osha_compliance_status', params: { project_id: '2240' }, result: '5 categories', resultCount: 5, durationMs: 334, status: 'success' },
+      ]
+    }
+    if (q.includes('observation') || q.includes('hazard') || q.includes('near miss')) {
+      return [
+        { id: id1, platform: 'safety-platform', tool: 'list_safety_observations', params: { project_id: '2240', limit: 10 }, result: '6 observations', resultCount: 6, durationMs: 212, status: 'success' },
+      ]
+    }
+    return [
+      { id: id1, platform: 'safety-platform', tool: 'list_incidents', params: { project_id: '2240' }, result: '5 incidents', resultCount: 5, durationMs: 289, status: 'success' },
+      { id: id2, platform: 'safety-platform', tool: 'get_safety_metrics', params: { project_id: '2240' }, result: 'Safety metrics', durationMs: 198, status: 'success' },
+    ]
+  }
+
   // preconstruction
   if (q.includes('bid') || q.includes('itb') || q.includes('buildingconnected') || q.includes('invitation')) {
     return [
@@ -331,6 +439,15 @@ export function getDemoResponse(role: Role, query: string): string {
     if (q.includes('job cost') || q.includes('2240') || q.includes('cost type')) return `CMiC Job Cost Report — Project 2240 (Riverside Tower) by Cost Type:\n\n\`\`\`json\n[\n  {"cost_type": "Subcontracts", "budget": 98400000, "committed": 97800000, "actual": 54200000, "projected_final": 99100000, "variance": -700000},\n  {"cost_type": "Owner Direct Costs", "budget": 8200000, "committed": 8050000, "actual": 4100000, "projected_final": 8300000, "variance": -100000},\n  {"cost_type": "General Conditions", "budget": 6800000, "committed": 6750000, "actual": 3400000, "projected_final": 7100000, "variance": -300000},\n  {"cost_type": "Contingency", "budget": 5400000, "committed": 1200000, "actual": 850000, "projected_final": 1200000, "variance": 4200000}\n]\n\`\`\`\n\n[OVER BUDGET] Projected final cost exceeds budget by $1,100,000 on subcontracts + GC. Contingency draw of $847K approved for concrete overage.`
     if (q.includes('milestone') || q.includes('schedule') || q.includes('baseline')) return `Schedule Milestone Status — All Projects:\n\n\`\`\`json\n[\n  {"project": "Riverside Tower", "milestone": "Structural Topping Out", "baseline": "05/15/2026", "forecast": "06/01/2026", "variance_days": -17, "status": "At Risk"},\n  {"project": "Harbor District Office", "milestone": "Mechanical Substantial Completion", "baseline": "07/30/2026", "forecast": "07/28/2026", "variance_days": 2, "status": "On Track"},\n  {"project": "Lakefront Retail", "milestone": "Final Completion", "baseline": "04/30/2026", "forecast": "04/25/2026", "variance_days": 5, "status": "Ahead"}\n]\n\`\`\``
     return OW_PORTFOLIO_RESPONSE
+  }
+
+  if (role === 'safety') {
+    if (q.includes('incident') || q.includes('osha') || q.includes('recordable') || q.includes('injury') || q.includes('accident')) return SAFETY_INCIDENTS_RESPONSE
+    if (q.includes('metric') || q.includes('trir') || q.includes('dart') || q.includes('performance') || q.includes('kpi') || q.includes('stat')) return SAFETY_METRICS_RESPONSE
+    if (q.includes('toolbox') || q.includes('tbt') || q.includes('training') || q.includes('talk') || q.includes('overdue')) return SAFETY_TOOLBOX_RESPONSE
+    if (q.includes('compliance') || q.includes('loto') || q.includes('ppe') || q.includes('inspection') || q.includes('violation')) return SAFETY_COMPLIANCE_RESPONSE
+    if (q.includes('observation') || q.includes('near miss') || q.includes('hazard') || q.includes('at-risk')) return `Safety Observations — Last 7 Days (Riverside Tower):\n\n\`\`\`json\n[\n  {"id": "OBS-2240-089", "type": "At-Risk", "description": "Ironworker not clipped off at leading edge — Level 14", "observer": "Safety Officer Chen", "date": "03/07/2026", "corrected_on_site": true},\n  {"id": "OBS-2240-088", "type": "Positive", "description": "Concrete crew conducting spontaneous housekeeping before shift end", "observer": "PM Rodriguez", "date": "03/06/2026", "corrected_on_site": false},\n  {"id": "OBS-2240-087", "type": "At-Risk", "description": "Missing barricade around Level 12 slab opening", "observer": "Safety Officer Chen", "date": "03/05/2026", "corrected_on_site": true},\n  {"id": "OBS-2240-086", "type": "Positive", "description": "Electrical crew conducting toolbox talk before energizing panel — best practice", "observer": "Superintendent Walsh", "date": "03/04/2026", "corrected_on_site": false}\n]\n\`\`\`\n\n**4 observations this week** | 2 at-risk (both corrected on site) | 2 positive behaviors recognized.`
+    return `Safety Dashboard — Riverside Tower (03/07/2026):\n\n- **TRIR (90-day):** 2.80 vs 3.40 industry avg ✓\n- **DART Rate:** 1.20 vs 1.80 industry avg ✓\n- **Days without recordable:** 8 (reset 02/21 — LOTO incident)\n- **Open incidents:** 2 OSHA-recordable, corrective actions pending\n- **[ALERT] LOTO non-compliance** — Electrical crew requires retraining\n\nUse the prompt chips above for incident reports, compliance status, toolbox talks, and safety metrics.`
   }
 
   // preconstruction

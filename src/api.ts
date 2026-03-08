@@ -29,6 +29,7 @@ export async function queryAEC(
   apiKey: string,
   projectId: string,
   platformConfigs?: Record<string, PlatformConfig>,
+  useProxy = false,
 ): Promise<QueryResult> {
   const roleConfig = ROLE_CONFIGS[role]
 
@@ -47,22 +48,28 @@ export async function queryAEC(
     { role: 'user' as const, content: userMessage },
   ]
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const body = {
+    model: 'claude-opus-4-6',
+    max_tokens: 4096,
+    thinking: { type: 'adaptive' },
+    system: systemPrompt,
+    messages,
+    mcp_servers: mcpServers,
+  }
+
+  // Use server-side proxy if available (keeps API key server-side)
+  const endpoint = useProxy ? '/api/proxy/messages' : 'https://api.anthropic.com/v1/messages'
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'anthropic-version': '2023-06-01',
+    'anthropic-beta': 'mcp-client-2025-04-04',
+  }
+  if (!useProxy) headers['x-api-key'] = apiKey
+
+  const response = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-beta': 'mcp-client-2025-04-04',
-    },
-    body: JSON.stringify({
-      model: 'claude-opus-4-6',
-      max_tokens: 4096,
-      thinking: { type: 'adaptive' },
-      system: systemPrompt,
-      messages,
-      mcp_servers: mcpServers,
-    }),
+    headers,
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
