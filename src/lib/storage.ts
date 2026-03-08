@@ -79,8 +79,14 @@ export function clearAnalytics(): void {
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 
-export function loadProfile(): UserProfile | null {
-  return get<UserProfile | null>('profile', null)
+const DEFAULT_PROFILE: UserProfile = {
+  name: '',
+  initials: '',
+  color: '#3b82f6',
+}
+
+export function loadProfile(): UserProfile {
+  return get<UserProfile>('profile', DEFAULT_PROFILE)
 }
 
 export function saveProfile(profile: UserProfile): void {

@@ -376,7 +376,8 @@ export default function ChatArea({ role, messages, isLoading, onSend, onClearCha
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const recognitionRef = useRef<SpeechRecognition | null>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const config = ROLE_CONFIGS[role]
 
   useEffect(() => {
@@ -428,12 +429,12 @@ export default function ChatArea({ role, messages, isLoading, onSend, onClearCha
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // Voice input
+  // Voice input — use any to avoid lib.dom SpeechRecognition type variance
   const toggleVoice = useCallback(() => {
-    const SpeechRecognition = (window as Window & { SpeechRecognition?: typeof window.SpeechRecognition; webkitSpeechRecognition?: typeof window.SpeechRecognition }).SpeechRecognition
-      ?? (window as Window & { webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SR = ((window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition) as (new () => any) | undefined
 
-    if (!SpeechRecognition) {
+    if (!SR) {
       alert('Voice input is not supported in this browser. Try Chrome or Edge.')
       return
     }
@@ -444,13 +445,14 @@ export default function ChatArea({ role, messages, isLoading, onSend, onClearCha
       return
     }
 
-    const recognition = new SpeechRecognition()
+    const recognition = new SR()
     recognition.lang = 'en-US'
     recognition.continuous = false
     recognition.interimResults = false
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      const transcript = event.results[0][0].transcript
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript as string
       setInput(prev => prev ? prev + ' ' + transcript : transcript)
       setIsListening(false)
     }
@@ -464,7 +466,8 @@ export default function ChatArea({ role, messages, isLoading, onSend, onClearCha
   }, [isListening])
 
   const supportsVoice = typeof window !== 'undefined' && (
-    'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    'SpeechRecognition' in window || 'webkitSpeechRecognition' in (window as any)
   )
 
   return (

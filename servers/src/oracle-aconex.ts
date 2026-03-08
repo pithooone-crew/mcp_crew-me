@@ -126,4 +126,38 @@ createSseServer('oracle-aconex', PORT, (server) => {
       }
     },
   )
+
+  // ── Write-back: Approve Workflow ──────────────────────────────────────────
+  server.tool(
+    'approve_workflow',
+    'Approve a pending workflow step in Oracle Aconex (e.g. change order, pay app, ASI). Records your approval and advances the workflow to the next step.',
+    {
+      project_id: z.string().describe('Aconex project ID'),
+      workflow_id: z.string().describe('Workflow ID (e.g. WF-2240-0089)'),
+      comment: z.string().optional().describe('Approval comment or notes'),
+      approved: z.boolean().optional().default(true).describe('True to approve, false to reject/send back'),
+    },
+    async ({ project_id, workflow_id, comment, approved }) => {
+      try {
+        const live = await aconexFetch(`/api/projects/${project_id}/workflows/${workflow_id}/approve`)
+        if (live) return ok({ ...live, source: 'aconex-live' })
+
+        const wf = MOCK_WORKFLOWS.find(w => w.workflow_id === workflow_id) ?? MOCK_WORKFLOWS[0]
+        return ok({
+          approved: approved ?? true,
+          workflow_id,
+          title: wf.title,
+          previous_step: wf.current_step,
+          new_status: (approved ?? true) ? 'Approved' : 'Returned for Revision',
+          comment: comment ?? '',
+          actioned_by: 'Owner Representative',
+          actioned_at: new Date().toISOString(),
+          source: 'mock',
+          message: `Workflow ${workflow_id} ${(approved ?? true) ? 'approved' : 'returned'} successfully.`,
+        })
+      } catch (e) {
+        return fail(String(e))
+      }
+    },
+  )
 })

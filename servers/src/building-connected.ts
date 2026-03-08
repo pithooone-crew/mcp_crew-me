@@ -148,4 +148,41 @@ createSseServer('building-connected', PORT, (server) => {
       }
     },
   )
+
+  // ── Write-back: Invite Subcontractor ──────────────────────────────────────
+  server.tool(
+    'invite_subcontractor',
+    'Invite a subcontractor to bid on an active ITB (Invitation to Bid) in BuildingConnected.',
+    {
+      project_id: z.string().describe('Project ID'),
+      itb_id: z.string().describe('ITB ID to invite the sub to (e.g. ITB-2244-005)'),
+      company_name: z.string().describe('Subcontractor company name'),
+      contact_email: z.string().describe('Contact email address'),
+      trade: z.string().optional().describe('Trade / CSI division'),
+      message: z.string().optional().describe('Custom invitation message'),
+    },
+    async ({ project_id, itb_id, company_name, contact_email, trade, message }) => {
+      try {
+        const live = await bcFetch(`/projects/${project_id}/bids/${itb_id}/invite`)
+        if (live) return ok({ ...live, source: 'bc-live' })
+
+        const itb = MOCK_BID_INVITATIONS.find(i => i.itb === itb_id) ?? MOCK_BID_INVITATIONS[0]
+        return ok({
+          invited: true,
+          itb_id,
+          project: itb.project,
+          trade: trade ?? itb.trade,
+          company_name,
+          contact_email,
+          invitation_sent_at: new Date().toISOString(),
+          bid_due: itb.bid_date,
+          custom_message: message ?? null,
+          source: 'mock',
+          message: `Invitation sent to ${company_name} (${contact_email}) for ${itb_id} — ${itb.trade}. Bid due ${itb.bid_date}.`,
+        })
+      } catch (e) {
+        return fail(String(e))
+      }
+    },
+  )
 })

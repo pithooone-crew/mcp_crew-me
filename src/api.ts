@@ -1,11 +1,16 @@
-import type { Role, ToolCall, PlatformConfig } from './types'
+import type { Role, ToolCall, PlatformConfig, UploadedFile } from './types'
 import { ROLE_CONFIGS } from './constants'
 import { getDemoResponse, getDemoToolCalls } from './demoData'
 
 export interface ApiMessage {
   role: 'user' | 'assistant'
-  content: string
+  content: string | ContentBlock[]
 }
+
+type ContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: { type: 'base64'; media_type: string; data: string } }
+  | { type: 'document'; source: { type: 'base64'; media_type: 'application/pdf'; data: string } }
 
 export interface QueryResult {
   text: string
@@ -22,6 +27,32 @@ function detectMultiSource(query: string, role: Role): boolean {
   return false
 }
 
+/** Build a user message content block array when files are attached */
+function buildUserContent(text: string, files?: UploadedFile[]): string | ContentBlock[] {
+  if (!files || files.length === 0) return text
+
+  const blocks: ContentBlock[] = []
+
+  // Add files first (images + documents)
+  for (const f of files) {
+    if (f.mediaType === 'application/pdf') {
+      blocks.push({
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: f.base64 },
+      })
+    } else {
+      blocks.push({
+        type: 'image',
+        source: { type: 'base64', media_type: f.mediaType, data: f.base64 },
+      })
+    }
+  }
+
+  // Text goes last
+  blocks.push({ type: 'text', text })
+  return blocks
+}
+
 export async function queryAEC(
   userMessage: string,
   role: Role,
@@ -30,6 +61,7 @@ export async function queryAEC(
   projectId: string,
   platformConfigs?: Record<string, PlatformConfig>,
   useProxy = false,
+  files?: UploadedFile[],
 ): Promise<QueryResult> {
   const roleConfig = ROLE_CONFIGS[role]
 
@@ -45,7 +77,7 @@ export async function queryAEC(
 
   const messages = [
     ...conversationHistory,
-    { role: 'user' as const, content: userMessage },
+    { role: 'user' as const, content: buildUserContent(userMessage, files) },
   ]
 
   const body = {
@@ -109,19 +141,28 @@ export async function queryDemo(
   role: Role,
   _conversationHistory: ApiMessage[],
   projectId: string,
+  files?: UploadedFile[],
 ): Promise<QueryResult> {
   // Simulate network delay
   await new Promise(r => setTimeout(r, 800 + Math.random() * 600))
 
-  const text = getDemoResponse(role, userMessage)
+  let text = getDemoResponse(role, userMessage)
+
+  // If files attached, acknowledge them in demo mode
+  if (files && files.length > 0) {
+    const imgCount = files.filter(f => f.mediaType !== 'application/pdf').length
+    const pdfCount = files.filter(f => f.mediaType === 'application/pdf').length
+    const attachNote = []
+    if (imgCount > 0) attachNote.push(`${imgCount} image${imgCount > 1 ? 's' : ''}`)
+    if (pdfCount > 0) attachNote.push(`${pdfCount} PDF${pdfCount > 1 ? 's' : ''}`)
+    text = `*[Attached: ${attachNote.join(', ')} — live mode required for document analysis]*\n\n` + text
+  }
+
   const toolCalls = getDemoToolCalls(role, userMessage)
   const isMultiSource = toolCalls.length > 1 || detectMultiSource(userMessage, role)
 
-  // Append project context acknowledgement if relevant
-  const contextNote = projectId ? `` : ''
-
   return {
-    text: text + contextNote,
+    text: text + (projectId ? '' : ''),
     toolCalls,
     isMultiSource,
   }

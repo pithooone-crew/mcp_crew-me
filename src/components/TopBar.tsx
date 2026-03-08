@@ -11,6 +11,7 @@ interface Props {
   onNotificationsOpen?: () => void
   onAnalyticsOpen?: () => void
   onPlaybooksOpen?: () => void
+  onProfileOpen?: () => void
   notificationCount?: number
   accent: string
   isDemo: boolean
@@ -18,7 +19,7 @@ interface Props {
 
 const ROLES = Object.values(ROLE_CONFIGS)
 
-export default function TopBar({ role, onRoleChange, project, onProjectChange, onConfigOpen, onNotificationsOpen, onAnalyticsOpen, onPlaybooksOpen, notificationCount = 0, accent }: Props) {
+export default function TopBar({ role, onRoleChange, project, onProjectChange, onConfigOpen, onNotificationsOpen, onAnalyticsOpen, onPlaybooksOpen, onProfileOpen, notificationCount = 0, accent }: Props) {
   const [projectOpen, setProjectOpen] = useState(false)
 
   return (
@@ -254,6 +255,29 @@ export default function TopBar({ role, onRoleChange, project, onProjectChange, o
               {notificationCount > 9 ? '9+' : notificationCount}
             </span>
           )}
+        </button>
+      )}
+
+      {/* Profile button */}
+      {onProfileOpen && (
+        <button
+          onClick={onProfileOpen}
+          style={{
+            background: 'transparent',
+            border: `1px solid ${COLORS.border}`,
+            borderRadius: 6,
+            color: COLORS.textMuted,
+            cursor: 'pointer',
+            padding: '6px 10px',
+            marginRight: 6,
+            fontSize: 13,
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = accent; e.currentTarget.style.borderColor = accent }}
+          onMouseLeave={e => { e.currentTarget.style.color = COLORS.textMuted; e.currentTarget.style.borderColor = COLORS.border }}
+          title="Profile"
+        >
+          👤
         </button>
       )}
 

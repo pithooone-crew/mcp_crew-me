@@ -1,17 +1,21 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { Role, Message, ToolCall, PlatformStatus, PlatformConfig, Project, Notification } from './types'
+import type { Role, Message, ToolCall, PlatformStatus, PlatformConfig, Project, Notification, UploadedFile } from './types'
 import { ROLE_CONFIGS, ROLE_ACCENT, COLORS, PROJECTS } from './constants'
 import { queryDemo, queryAEC } from './api'
 import type { ApiMessage } from './api'
-import { loadConversations, saveConversations, loadPlatformConfigs, savePlatformConfigs, loadNotifications, saveNotifications, appendAnalyticsEvent } from './lib/storage'
+import { loadConversations, saveConversations, loadPlatformConfigs, savePlatformConfigs, loadNotifications, saveNotifications, loadPlaybooks, savePlaybooks, loadAnalytics } from './lib/storage'
+import { getAnalyticsSummary } from './lib/analytics'
+import type { SavedQuery, PlaybookStore, Playbook } from './types'
 import { extractNotifications } from './lib/notifications'
 import { recordQuery } from './lib/analytics'
 import { useHealthPolling, getHealthUrl } from './hooks/useHealthPolling'
+import { useViewport } from './hooks/useViewport'
 import TopBar from './components/TopBar'
 import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
 import DataPanel from './components/DataPanel'
 import ConfigDrawer from './components/ConfigDrawer'
+import ProfilePanel from './components/ProfilePanel'
 
 function makeId() {
   return Math.random().toString(36).slice(2, 10)
@@ -52,9 +56,11 @@ export default function App() {
   const [playbooksOpen, setPlaybooksOpen] = useState(false)
   const [platformConfigs, setPlatformConfigs] = useState<Record<string, PlatformConfig>>(loadPlatformConfigs)
   const [notifications, setNotifications] = useState<Notification[]>(loadNotifications)
+  const [profileOpen, setProfileOpen] = useState(false)
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false)
   const [cmdQuery, setCmdQuery] = useState('')
   const cmdInputRef = useRef<HTMLInputElement>(null)
+  const { isMobile, isTablet } = useViewport()
 
   // Check if proxy server is reachable
   useEffect(() => {
@@ -112,11 +118,12 @@ export default function App() {
         if (notificationsOpen) setNotificationsOpen(false)
         if (analyticsOpen) setAnalyticsOpen(false)
         if (playbooksOpen) setPlaybooksOpen(false)
+        if (profileOpen) setProfileOpen(false)
       }
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [cmdPaletteOpen, notificationsOpen, analyticsOpen, playbooksOpen])
+  }, [cmdPaletteOpen, notificationsOpen, analyticsOpen, playbooksOpen, profileOpen])
 
   useEffect(() => {
     if (cmdPaletteOpen && cmdInputRef.current) {
@@ -129,13 +136,18 @@ export default function App() {
     setToolCalls([])
   }, [])
 
-  const handleSend = useCallback(async (message: string) => {
+  const handleSend = useCallback(async (message: string, files?: UploadedFile[]) => {
     if (!message.trim() || isLoading) return
+
+    // Build display text: show file names when attached
+    const filesSuffix = files && files.length > 0
+      ? `\n📎 ${files.map(f => f.name).join(', ')}`
+      : ''
 
     const userMsg: Message = {
       id: makeId(),
       role: 'user',
-      content: message,
+      content: message + filesSuffix,
       timestamp: new Date(),
     }
 
@@ -146,7 +158,7 @@ export default function App() {
     setIsLoading(true)
     setToolCalls([])
 
-    // Build conversation history for API
+    // Build conversation history for API (text-only for history)
     const history: ApiMessage[] = conversations[role].map(m => ({
       role: m.role,
       content: m.content,
@@ -155,10 +167,10 @@ export default function App() {
     try {
       let result
       if (isDemo) {
-        result = await queryDemo(message, role, history, project.id)
+        result = await queryDemo(message, role, history, project.id, files)
       } else {
         if (!apiKey && !useProxy) throw new Error('API key required. Open ⚙ Config to add your key.')
-        result = await queryAEC(message, role, history, apiKey, project.id, platformConfigs, useProxy)
+        result = await queryAEC(message, role, history, apiKey, project.id, platformConfigs, useProxy, files)
       }
 
       setToolCalls(result.toolCalls)
@@ -223,6 +235,18 @@ export default function App() {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })))
   }, [])
 
+  const handleSaveQuery = useCallback((text: string) => {
+    const store = loadPlaybooks()
+    const q: SavedQuery = {
+      id: makeId(),
+      text,
+      role,
+      projectId: project.id,
+      createdAt: new Date().toISOString(),
+    }
+    savePlaybooks({ ...store, savedQueries: [...store.savedQueries, q] })
+  }, [role, project.id])
+
   const unreadCount = notifications.filter(n => !n.read).length
   const accent = ROLE_ACCENT[role]
   const messages = conversations[role]
@@ -279,20 +303,24 @@ export default function App() {
         onNotificationsOpen={() => setNotificationsOpen(true)}
         onAnalyticsOpen={() => setAnalyticsOpen(true)}
         onPlaybooksOpen={() => setPlaybooksOpen(true)}
+        onProfileOpen={() => setProfileOpen(true)}
         notificationCount={unreadCount}
         accent={accent}
         isDemo={isDemo}
       />
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <Sidebar
-          role={role}
-          platformStatus={platformStatus}
-          platformConfigs={platformConfigs}
-          isDemo={isDemo}
-          onConfigOpen={() => setConfigOpen(true)}
-          accent={accent}
-        />
+        {/* Sidebar hidden on mobile */}
+        {!isMobile && (
+          <Sidebar
+            role={role}
+            platformStatus={platformStatus}
+            platformConfigs={platformConfigs}
+            isDemo={isDemo}
+            onConfigOpen={() => setConfigOpen(true)}
+            accent={accent}
+          />
+        )}
 
         <ChatArea
           role={role}
@@ -302,14 +330,18 @@ export default function App() {
           onClearChat={handleClearChat}
           accent={accent}
           project={project}
+          onSaveQuery={handleSaveQuery}
         />
 
-        <DataPanel
-          toolCalls={toolCalls}
-          role={role}
-          accent={accent}
-          isLoading={isLoading}
-        />
+        {/* DataPanel hidden on mobile and tablet */}
+        {!isMobile && !isTablet && (
+          <DataPanel
+            toolCalls={toolCalls}
+            role={role}
+            accent={accent}
+            isLoading={isLoading}
+          />
+        )}
       </div>
 
       {configOpen && (
@@ -322,6 +354,14 @@ export default function App() {
           onPlatformConfigChange={setPlatformConfigs}
           role={role}
           onClose={() => setConfigOpen(false)}
+          accent={accent}
+        />
+      )}
+
+      {/* Profile Panel */}
+      {profileOpen && (
+        <ProfilePanel
+          onClose={() => setProfileOpen(false)}
           accent={accent}
         />
       )}
@@ -540,9 +580,6 @@ export default function App() {
 
 // ── Inline Analytics Panel ──────────────────────────────────────────────────────
 
-import { loadAnalytics } from './lib/storage'
-import { getAnalyticsSummary } from './lib/analytics'
-
 function AnalyticsPanel({ onClose, accent }: { onClose: () => void; accent: string }) {
   const store = loadAnalytics()
   const summary = getAnalyticsSummary(store)
@@ -666,9 +703,6 @@ function AnalyticsPanel({ onClose, accent }: { onClose: () => void; accent: stri
 }
 
 // ── Inline Playbooks Panel ──────────────────────────────────────────────────────
-
-import { loadPlaybooks, savePlaybooks } from './lib/storage'
-import type { PlaybookStore, SavedQuery, Playbook } from './types'
 
 function PlaybooksPanel({ onClose, onSend, role, project, accent }: {
   onClose: () => void
